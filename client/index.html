@@ -1,0 +1,72 @@
+<html ng-app="api_app">
+<head>
+  <title>1955 API Redux</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.5/angular.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.5/angular-route.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular-messages.js"></script>
+  <script type='text/javascript'>
+  //  MODULE
+  var api_app = angular.module('api_app', ['ngRoute']);
+////////////////////************ROUTE************//////////////////////////////////
+  api_app.config( function ($routeProvider) {
+      $routeProvider
+        .when('/user',{
+          templateUrl: 'partials/users.html'
+        })
+        .otherwise({
+          redirectTo: '/user'
+        });             
+      });
+///////////////////************FACTORIES*******////////////////////////////////////
+  
+  api_app.factory('UserFactory', function($http) {
+  var factory = {};
+  var users = [];
+    factory.index = function(callback) {
+      $http.get('/user').success(function(users) {
+        callback(users);
+      }); 
+    }
+    factory.create = function(info, callback) {
+      console.log(info); 
+      $http.post('/user', info).success(function(data){
+          callback()    
+      });      
+    }
+    factory.delete = function(id, callback){
+      $http.delete('/user/'+ id).success(function(data){
+        callback();
+      });
+    }
+  return factory;
+});
+
+////////////////////////*************CONTROLER***************/////////////////////
+
+  api_app.controller('UsersController', function($scope, UserFactory) {
+    // $scope.users = UserFactory.users;
+    $scope.newUser = {}
+  var index = function(){
+      UserFactory.index(function(data){
+      $scope.users = data
+      })
+    }
+        index();
+
+  $scope.create = function() {
+    UserFactory.create($scope.newUser, index);
+    $scope.newUser = {};
+
+  }
+  $scope.delete = function(id){
+      UserFactory.delete(id, index)
+      }
+});  
+
+</script>
+</head>
+<body>
+  <div ng-view="">
+  </div>
+</body>
+</html>
